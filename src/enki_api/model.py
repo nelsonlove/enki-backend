@@ -55,6 +55,7 @@ class User(BaseModel):
 
     username = db.Column(db.String(120), unique=True, nullable=True)
     email = db.Column(db.String(120), unique=True, nullable=False)
+    api_key = db.Column(db.String(80), unique=True, nullable=False)
 
     prompts = db.relationship('Prompt', backref=db.backref('owner', lazy=True), foreign_keys=[Asset.owner_id])
     chats = db.relationship('Chat', backref=db.backref('owner', lazy=True), foreign_keys=[Asset.owner_id])
