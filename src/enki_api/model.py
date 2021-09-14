@@ -19,10 +19,6 @@ class BaseModel(db.Model):
         'polymorphic_on': type
     }
 
-    @property
-    def date_last_active(self):
-        return self.date_modified or self.date_created
-
     def __repr__(self):
         return f'<{self.__class__.__name__} #{self.id}>'
 
@@ -66,10 +62,6 @@ class User(BaseModel):
     __mapper_args__ = {
         'polymorphic_identity': 'user',
     }
-
-    @property
-    def display_name(self):
-        return self.username or f'Anonymous #{self.id}'
 
     def __repr__(self):
         return f'<User "{self.display_name}">'
