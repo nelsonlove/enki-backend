@@ -12,14 +12,16 @@ class UserList(ResourceList):
     def query(self, view_kwargs):
         # Handles login, probably not standards-compliant but it'll do for now
         query_ = self.session.query(User)
-        auth_id = request.form.get('auth_id')
-        if 'auth_id' is not None:
+        auth_id = request.args.get('auth_id')
+        if auth_id is not None:
             try:
-                user = self.session.query(User).filter_by(auth_id=auth_id).one()
+                query_ = self.session.query(User).filter_by(auth_id=auth_id)
+                user = query_.one()
             except NoResultFound:
                 raise ObjectNotFound({'parameter': 'id'}, "User: {} not found".format(auth_id))
             else:
                 user.date_modified = db.func.now()
+
         return query_
 
     schema = UserSchema
