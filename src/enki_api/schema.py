@@ -10,35 +10,10 @@ class BaseSchema(Schema):
     date_last_active = fields.Function(lambda obj: obj.date_modified or obj.date_created)
 
 
-class BaseRelationship(Relationship):
-    def __init__(self, *args, **kwargs):
-        super().__init__(
-            self_view_kwargs={'id': '<id>'},
-        )
-
-
 class AssetSchema(BaseSchema):
     name = fields.Str()
     description = fields.Str()
     messages = fields.List(fields.List(fields.Str()))
-
-
-class AssetRelationship(BaseRelationship):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args,
-                         related_view_kwargs={'id': '<id>'},
-                         many=True,
-                         **kwargs)
-
-
-class OwnerRelationship(BaseRelationship):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args,
-                         attribute='owner',
-                         related_view='user_detail',
-                         schema='UserSchema',
-                         type_='user',
-                         **kwargs)
 
 
 class UserSchema(BaseSchema):
@@ -48,25 +23,26 @@ class UserSchema(BaseSchema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'user_list'
 
+    # TODO move assets_last_active here?
     email = fields.Email(load_only=True)
     username = fields.Str()
     display_name = fields.Function(lambda obj: obj.username or f'Anonymous #{obj.id}')
-    # TODO move assets_last_active here?
-    prompts = AssetRelationship(self_view='user_prompts',
-                                related_view='prompt_list',
-                                schema='PromptSchema',
-                                type_='prompt')
+    prompts = Relationship(self_view='user_prompts',
+                           self_view_kwargs={'id': '<id>'},
+                           related_view='prompt_list',
+                           related_view_kwargs={'id': '<id>'},
+                           many=True,
+                           schema='PromptSchema',
+                           type_='prompt')
 
 
-class PromptSchema(BaseSchema):
+class PromptSchema(AssetSchema):
     class Meta:
         type_ = 'prompt'
         self_view = 'prompt_detail'
         self_view_kwargs = {'id': '<id>'}
 
     # TODO validation should probably go in here
-    owner = OwnerRelationship(self_view='prompt_owner',
-                              related_view_kwargs={'prompt_id': '<id>'})
     intro_text = fields.Str()
     bot_name = fields.Str()
     human_name = fields.Str()
@@ -74,3 +50,10 @@ class PromptSchema(BaseSchema):
     temperature = fields.Float()
     frequency_penalty = fields.Float()
     presence_penalty = fields.Float()
+    owner = Relationship(attribute='user',
+                         self_view='prompt_user',
+                         self_view_kwargs={'id': '<id>'},
+                         related_view='user_detail',
+                         related_view_kwargs={'prompt_id': '<id>'},
+                         schema='UserSchema',
+                         type_='user')
