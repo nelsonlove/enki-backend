@@ -24,8 +24,8 @@ database.init_app(app)
 db = database.db
 
 api = Api(app)
+api.route(UserList, 'user_list', '/users', '/login')
 
-api.route(UserList, 'user_list', '/users')
 api.route(UserDetail, 'user_detail',
           '/users/<int:id>',
           '/prompts/<int:prompt_id>/owner',

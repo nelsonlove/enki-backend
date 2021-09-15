@@ -92,5 +92,3 @@ class ChatSchema(AssetSchema):
                           related_view_kwargs={'id': '<id>'},
                           schema='PromptSchema',
                           type_='prompt')
-
-
