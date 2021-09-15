@@ -1,5 +1,6 @@
 import json
 
+from sqlalchemy import update
 from sqlalchemy.orm import declared_attr
 
 from .database import db
@@ -64,6 +65,10 @@ class User(BaseModel):
     username = db.Column(db.String(120), unique=True, nullable=True)
     auth_id = db.Column(db.String(120), unique=True, nullable=False)  # from auth0
     api_key = db.Column(db.String(80), unique=True, nullable=False)
+
+    def touch(self):
+        stmt = update(User).where(User.id == self.id)
+        db.engine.execute(stmt)
 
     @property
     def assets_last_active(self):

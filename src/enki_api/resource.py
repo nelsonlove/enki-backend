@@ -10,7 +10,7 @@ from src.enki_api.schema import UserSchema, PromptSchema, ChatSchema
 
 class UserList(ResourceList):
     def query(self, view_kwargs):
-        # Handles login, probably not standards-compliant but it'll do for now
+        # Looks up user from auth_id
         query_ = self.session.query(User)
         auth_id = request.args.get('auth_id')
         if auth_id is not None:
@@ -20,7 +20,8 @@ class UserList(ResourceList):
             except NoResultFound:
                 raise ObjectNotFound({'parameter': 'id'}, "User: {} not found".format(auth_id))
             else:
-                user.date_modified = db.func.now()
+                # user.date_modified = db.func.now()
+                user.touch()
 
         return query_
 
