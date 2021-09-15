@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_rest_jsonapi import Api
+from flask_cors import CORS
 
 from . import database
 from .resource import (
@@ -16,6 +17,8 @@ from .resource import (
 
 app = Flask(__name__)
 
+CORS(app)
+
 app.config['SECRET_KEY'] = 'ultratopsecretkey'
 app.config['DEBUG'] = True
 
@@ -24,7 +27,7 @@ database.init_app(app)
 db = database.db
 
 api = Api(app)
-api.route(UserList, 'user_list', '/users', '/login')
+api.route(UserList, 'user_list', '/users', '/users/login')
 
 api.route(UserDetail, 'user_detail',
           '/users/<int:id>',
