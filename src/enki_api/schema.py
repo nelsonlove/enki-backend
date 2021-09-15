@@ -57,3 +57,26 @@ class PromptSchema(AssetSchema):
                          related_view_kwargs={'prompt_id': '<id>'},
                          schema='UserSchema',
                          type_='user')
+
+
+class ChatSchema(AssetSchema):
+    class Meta:
+        type_ = 'chat'
+        self_view = 'chat_detail'
+        self_view_kwargs = {'id': '<id>'}
+
+    prompt = Relationship(attribute='prompt',
+                          self_view='chat_prompt',
+                          self_view_kwargs={'id': '<id>'},
+                          related_view='prompt_detail',
+                          related_view_kwargs={'prompt_id': '<id>'},
+                          schema='PromptSchema',
+                          type_='prompt')
+
+    owner = Relationship(attribute='user',
+                         self_view='chat_user',
+                         self_view_kwargs={'id': '<id>'},
+                         related_view='user_detail',
+                         related_view_kwargs={'chat_id': '<id>'},
+                         schema='UserSchema',
+                         type_='user')
