@@ -62,7 +62,7 @@ class Prompt(Asset):
 
 class User(BaseModel):
     username = db.Column(db.String(120), unique=True, nullable=True)
-    email = db.Column(db.String(120), unique=True, nullable=False)
+    auth_id = db.Column(db.String(120), unique=True, nullable=False)  # from auth0
     api_key = db.Column(db.String(80), unique=True, nullable=False)
 
     @property
