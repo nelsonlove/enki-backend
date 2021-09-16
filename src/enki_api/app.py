@@ -45,7 +45,7 @@ api.route(PromptDetail, 'prompt_detail',
 api.route(PromptRelationship, 'prompt_user', '/prompts/<int:id>/relationships/owner')
 api.route(PromptRelationship, 'prompt_chats', '/prompts/<int:id>/relationships/chats')
 
-api.route(ChatList, 'chat_list', '/chats')
+api.route(ChatList, 'chat_list', '/chats', '/users/<int:id>/chats')
 api.route(ChatDetail, 'chat_detail', '/chats/<int:id>')
 api.route(ChatRelationship, 'chat_user', '/chats/<int:id>/relationships/owner')
 api.route(ChatRelationship, 'chat_prompt', '/chats/<int:id>/relationships/prompt')
