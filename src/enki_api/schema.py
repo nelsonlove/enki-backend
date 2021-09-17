@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from marshmallow_jsonapi import fields
 from marshmallow_jsonapi.flask import Schema, Relationship
 
@@ -69,10 +71,22 @@ class PromptSchema(AssetSchema):
     chats = Relationship(self_view='prompt_chats',
                          self_view_kwargs={'id': '<id>'},
                          related_view='chat_list',
-                         related_view_kwargs={'chat_id': '<id>'},
+                         related_view_kwargs={'chat_id': '<id>'},  # this i think needs to be changed to prompt_id
+                                                                   # for the related link to look right
                          many=True,
                          schema='ChatSchema',
                          type_='chat')
+
+
+def display_last_modified(chat):
+    days_since_active = (datetime.now() - chat.date_modified).days
+    if days_since_active == 0:
+        fstring = '%I:%M %p'
+    elif days_since_active <= 6:
+        fstring = '%A'
+    else:
+        fstring = '%m/%d/%y'
+    return chat.date_modified.strftime(fstring).lstrip('0')
 
 
 class ChatSchema(AssetSchema):
@@ -82,7 +96,7 @@ class ChatSchema(AssetSchema):
         self_view_kwargs = {'id': '<id>'}
         self_view_many = 'chat_list'
 
-    messages = fields.Function(lambda obj: obj.prompt.messages + obj.messages)
+    messages = fields.Function(lambda chat: chat.prompt.messages + chat.messages)
     owner = Relationship(self_view='chat_user',
                          self_view_kwargs={'id': '<id>'},
                          related_view='user_detail',
@@ -95,3 +109,7 @@ class ChatSchema(AssetSchema):
                           related_view_kwargs={'id': '<id>'},
                           schema='PromptSchema',
                           type_='prompt')
+    human_name = fields.Function(lambda chat: chat.prompt.human_name)
+    bot_name = fields.Function(lambda chat: chat.prompt.bot_name)
+    intro_text = fields.Function(lambda chat: chat.prompt.intro_text)
+    display_date_modified = fields.Function(lambda chat: display_last_modified(chat))
