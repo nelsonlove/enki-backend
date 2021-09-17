@@ -12,7 +12,7 @@ class UserList(ResourceList):
     def query(self, view_kwargs):
         # Looks up user from auth_id
         query_ = self.session.query(User)
-        auth_id = request.values.get('auth_id')
+        auth_id = request.json.get('auth_id')
         if auth_id is not None:
             try:
                 query_ = self.session.query(User).filter_by(auth_id=auth_id)

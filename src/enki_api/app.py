@@ -59,11 +59,7 @@ api.route(ChatRelationship, 'chat_prompt', '/chats/<int:id>/relationships/prompt
 
 @app.route('/chats/<int:chat_id>/messages', methods=['POST'])
 def post_message(chat_id):
-    # print(request.json)
-    # print(request.args)
-    message = request.values.get('message')
-    # print(message)
-    # return message
+    message = request.json.get('message')
     chat = Chat.query.filter_by(id=chat_id)[0]
     prompt = ChatPrompt(
         chat.prompt.bot_name,
