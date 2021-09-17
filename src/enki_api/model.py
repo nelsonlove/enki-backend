@@ -43,7 +43,6 @@ class Asset(BaseModel):
 
 class Chat(Asset):
     prompt_id = db.Column(db.Integer, db.ForeignKey('prompt.id'), nullable=False)
-
     owner = db.relationship("User", backref=db.backref('chats', lazy=True))
     prompt = db.relationship("Prompt", backref=db.backref('chats', lazy=True))
 
