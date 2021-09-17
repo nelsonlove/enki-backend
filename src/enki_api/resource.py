@@ -3,16 +3,16 @@ from flask_rest_jsonapi import ResourceList, ResourceDetail, ResourceRelationshi
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from src.enki_api.database import db
-from src.enki_api.model import User, Prompt, Chat
-from src.enki_api.schema import UserSchema, PromptSchema, ChatSchema
+from .database import db
+from .model import User, Prompt, Chat
+from .schema import UserSchema, PromptSchema, ChatSchema
 
 
 class UserList(ResourceList):
     def query(self, view_kwargs):
         # Looks up user from auth_id
         query_ = self.session.query(User)
-        auth_id = request.args.get('auth_id')
+        auth_id = request.values.get('auth_id')
         if auth_id is not None:
             try:
                 query_ = self.session.query(User).filter_by(auth_id=auth_id)
@@ -81,6 +81,9 @@ class UserRelationship(ResourceRelationship):
         'session': db.session,
         'model': User
     }
+
+
+# might want to get public resources only for list endpoints
 
 
 class PromptList(ResourceList):
