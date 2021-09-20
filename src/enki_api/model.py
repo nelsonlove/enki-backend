@@ -27,7 +27,7 @@ class Asset(BaseModel):
     _messages = db.Column(db.Text, nullable=False)
 
     @declared_attr
-    def owner_id(cls):
+    def owner_id(self):
         return db.Column(db.Integer, db.ForeignKey('user.id'))
 
     @property
