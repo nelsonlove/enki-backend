@@ -51,9 +51,9 @@ class PromptSchema(AssetSchema):
         self_view_many = 'prompt_list'
 
     # TODO validation should probably go in here
-    display_name = fields.Function(lambda obj: (obj.name
-                                                or obj.description
-                                                or obj.intro_text[0:max(len(obj.intro_text), 20)]))
+    display_name = fields.Function(lambda obj: (obj.name or 'Untitled Prompt #' + str(obj.id)))
+                                                # or obj.description
+                                                # or obj.intro_text[0:max(len(obj.intro_text), 20)]))
     intro_text = fields.Str()
     bot_name = fields.Str()
     human_name = fields.Str()
