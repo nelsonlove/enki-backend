@@ -82,6 +82,8 @@ def display_last_modified(chat):
     days_since_active = (datetime.now() - chat.date_modified).days
     if days_since_active == 0:
         fstring = '%I:%M %p'
+    elif days_since_active == 1:
+        return 'Yesterday'
     elif days_since_active <= 6:
         fstring = '%A'
     else:
