@@ -57,10 +57,31 @@ api.route(ChatRelationship, 'chat_user', '/chats/<int:id>/relationships/owner')
 api.route(ChatRelationship, 'chat_prompt', '/chats/<int:id>/relationships/prompt')
 
 
+@app.route('/chats/<int:chat_id>/restart', methods=['POST'])
+def restart_chat(chat_id):
+    chat = Chat.query.filter_by(id=chat_id)[0]
+    chat.messages = []
+    chat.date_modified = datetime.now()
+    db.session.add(chat)
+    db.session.commit()
+    return {'status': 'success'}, 200
+
+
+@app.route('/chats/<int:chat_id>/rollback', methods=['POST'])
+def rollback_chat(chat_id):
+    chat = Chat.query.filter_by(id=chat_id)[0]
+    chat.messages = chat.messages[:-1]
+    chat.date_modified = datetime.now()
+    db.session.add(chat)
+    db.session.commit()
+    return {'status': 'success'}, 200
+
+
 @app.route('/chats/<int:chat_id>/messages', methods=['POST'])
 def post_message(chat_id):
     message = request.json.get('message')
     chat = Chat.query.filter_by(id=chat_id)[0]
+    chat.date_modified = datetime.now()
     prompt = ChatPrompt(
         chat.prompt.bot_name,
         chat.prompt.human_name,
@@ -78,7 +99,7 @@ def post_message(chat_id):
     ).response(prompt.format(message))
 
     chat.messages += [[message, reply]]
-    chat.date_updated = datetime.now()
+    chat.date_modified = datetime.now()
     db.session.add(chat)
     db.session.commit()
     return reply
