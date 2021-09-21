@@ -1,3 +1,4 @@
+import json
 from datetime import datetime
 
 from flask import Flask, request
@@ -70,7 +71,7 @@ def restart_chat(chat_id):
 @app.route('/chats/<int:chat_id>/rollback', methods=['POST'])
 def rollback_chat(chat_id):
     chat = Chat.query.filter_by(id=chat_id)[0]
-    chat.messages = chat.messages[:-1]
+    chat.messages = json.dumps(chat.messages[:-1])
     chat.date_modified = datetime.now()
     db.session.add(chat)
     db.session.commit()
@@ -80,7 +81,9 @@ def rollback_chat(chat_id):
 @app.route('/chats/<int:chat_id>/messages', methods=['POST'])
 def post_message(chat_id):
     message = request.json.get('message')
+    # print(message)
     chat = Chat.query.filter_by(id=chat_id)[0]
+    # print(json.dumps(chat.prompt.messages))
     chat.date_modified = datetime.now()
     prompt = ChatPrompt(
         chat.prompt.bot_name,
@@ -89,6 +92,8 @@ def post_message(chat_id):
         intro_text=chat.prompt.intro_text
     )
     prompt.messages += chat.messages
+    prompt_txt = prompt.format(message)
+    # print(prompt_txt)
     reply = GPT(
         engine="davinci",
         stop='\n',
@@ -96,9 +101,9 @@ def post_message(chat_id):
         temperature=chat.prompt.temperature,
         presence_penalty=chat.prompt.presence_penalty,
         frequency_penalty=chat.prompt.frequency_penalty,
-    ).response(prompt.format(message))
+    ).response(prompt_txt)
 
-    chat.messages += [[message, reply]]
+    chat.messages = json.dumps(chat.messages + [[message, reply]])
     chat.date_modified = datetime.now()
     db.session.add(chat)
     db.session.commit()
