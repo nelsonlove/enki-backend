@@ -72,8 +72,7 @@ class PromptSchema(AssetSchema):
     chats = Relationship(self_view='prompt_chats',
                          self_view_kwargs={'id': '<id>'},
                          related_view='chat_list',
-                         related_view_kwargs={'chat_id': '<id>'},  # this i think needs to be changed to prompt_id
-                                                                   # for the related link to look right
+                         related_view_kwargs={'prompt_id': '<id>'},
                          many=True,
                          schema='ChatSchema',
                          type_='chat')
@@ -109,7 +108,7 @@ class ChatSchema(AssetSchema):
     prompt = Relationship(self_view='chat_prompt',
                           self_view_kwargs={'id': '<id>'},
                           related_view='prompt_detail',
-                          related_view_kwargs={'id': '<id>'},
+                          related_view_kwargs={'chat_id': '<id>'},
                           schema='PromptSchema',
                           type_='prompt')
     human_name = fields.Function(lambda chat: chat.prompt.human_name)

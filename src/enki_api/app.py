@@ -47,6 +47,7 @@ api.route(UserRelationship, 'user_chats', '/users/<int:id>/relationships/chats')
 api.route(PromptList, 'prompt_list', '/prompts', '/users/<int:id>/prompts')
 api.route(PromptDetail, 'prompt_detail',
           '/prompts/<int:id>',
+          '/prompts/<int:prompt_id>',
           '/chats/<int:chat_id>/prompt'
           )
 api.route(PromptRelationship, 'prompt_user', '/prompts/<int:id>/relationships/owner')
@@ -81,9 +82,7 @@ def rollback_chat(chat_id):
 @app.route('/chats/<int:chat_id>/messages', methods=['POST'])
 def post_message(chat_id):
     message = request.json.get('message')
-    # print(message)
     chat = Chat.query.filter_by(id=chat_id)[0]
-    # print(json.dumps(chat.prompt.messages))
     chat.date_modified = datetime.now()
     prompt = ChatPrompt(
         chat.prompt.bot_name,
@@ -93,7 +92,6 @@ def post_message(chat_id):
     )
     prompt.messages += chat.messages
     prompt_txt = prompt.format(message)
-    # print(prompt_txt)
     reply = GPT(
         engine="davinci",
         stop='\n',

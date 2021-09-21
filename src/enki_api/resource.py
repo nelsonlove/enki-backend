@@ -157,9 +157,18 @@ class ChatList(ResourceList):
             try:
                 self.session.query(User).filter_by(id=view_kwargs['id']).one()
             except NoResultFound:
-                raise ObjectNotFound({'parameter': 'id'}, "User: {} not found".format(view_kwargs['id']))
+                raise ObjectNotFound({'parameter': 'id'},
+                                     "User: {} not found".format(view_kwargs['id']))
             else:
                 query_ = query_.join(User).filter(User.id == view_kwargs['id'])
+        elif view_kwargs.get('prompt_id') is not None:
+            try:
+                self.session.query(Prompt).filter_by(prompt_id=view_kwargs['prompt_id']).one()
+            except NoResultFound:
+                raise ObjectNotFound({'parameter': 'prompt_id'},
+                                     "Prompt: {} not found".format(view_kwargs['prompt_id']))
+            else:
+                query_ = query_.filter(Prompt.id == view_kwargs['prompt_id'])
         return query_
 
     def before_create_object(self, data, view_kwargs):
