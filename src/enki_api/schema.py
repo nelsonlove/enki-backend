@@ -25,8 +25,9 @@ class UserSchema(BaseSchema):
 
     # TODO move assets_last_active here?
     auth_id = fields.Str()  # from auth0
-    username = fields.Str()
-    display_name = fields.Function(lambda obj: obj.username or f'Anonymous #{obj.id}')
+    nickname = fields.Str()
+    api_key = fields.Str(load_only=True)
+    display_name = fields.Function(lambda obj: obj.nickname or f'Anonymous #{obj.id}')
     prompts = Relationship(self_view='user_prompts',
                            self_view_kwargs={'id': '<id>'},
                            related_view='prompt_list',
@@ -61,7 +62,7 @@ class PromptSchema(AssetSchema):
     temperature = fields.Float()
     frequency_penalty = fields.Float()
     presence_penalty = fields.Float()
-    messages = fields.List(fields.List(fields.Str()))
+    messages = fields.Function(lambda prompt: prompt.messages)
     owner = Relationship(self_view='prompt_user',
                          self_view_kwargs={'id': '<id>'},
                          related_view='user_detail',

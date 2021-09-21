@@ -37,8 +37,8 @@ class Asset(BaseModel):
         return json.loads(self._messages)
 
     @messages.setter
-    def messages(self, message_list):
-        self._messages = json.dumps(message_list)
+    def messages(self, message_json_str):
+        self._messages = message_json_str
 
 
 class Chat(Asset):
@@ -61,7 +61,7 @@ class Prompt(Asset):
 
 
 class User(BaseModel):
-    username = db.Column(db.String(120), unique=True, nullable=True)
+    nickname = db.Column(db.String(120), unique=True, nullable=True)
     auth_id = db.Column(db.String(120), unique=True, nullable=False)  # from auth0
     api_key = db.Column(db.String(80), unique=True, nullable=False)
 
