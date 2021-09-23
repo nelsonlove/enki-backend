@@ -86,18 +86,14 @@ class PromptSchema(Schema):
                          schema='ChatSchema',
                          type_='chat')
 
+    messages = Relationship(self_view='prompt_messages',
+                            self_view_kwargs={'id': '<id>'},
+                            related_view='message_list',
+                            related_view_kwargs={'prompt_id': '<id>'},
+                            many=True,
+                            schema='MessageSchema',
+                            type_='message')
 
-def display_last_modified(chat):
-    days_since_active = (datetime.now() - chat.date_modified).days
-    if days_since_active == 0:
-        fstring = '%I:%M %p'
-    elif days_since_active == 1:
-        return 'Yesterday'
-    elif days_since_active <= 6:
-        fstring = '%A'
-    else:
-        fstring = '%m/%d/%y'
-    return chat.date_modified.strftime(fstring).lstrip('0')
 
 class ChatSchema(Schema):
     class Meta:
@@ -128,7 +124,41 @@ class ChatSchema(Schema):
                           related_view_kwargs={'chat_id': '<id>'},
                           schema='PromptSchema',
                           type_='prompt')
-    human_name = fields.Function(lambda chat: chat.prompt.human_name)
-    bot_name = fields.Function(lambda chat: chat.prompt.bot_name)
-    intro_text = fields.Function(lambda chat: chat.prompt.intro_text)
-    display_date_modified = fields.Function(lambda chat: display_last_modified(chat))
+
+    messages = Relationship(self_view='chat_messages',
+                            self_view_kwargs={'id': '<id>'},
+                            related_view='message_list',
+                            related_view_kwargs={'chat_id': '<id>'},
+                            many=True,
+                            schema='MessageSchema',
+                            type_='message')
+
+
+class MessageSchema(Schema):
+    class Meta:
+        type_ = 'message'
+        self_view = 'message_detail'
+        self_view_kwargs = {'id': '<id>'}
+        self_view_many = 'message_list'
+        inflect = underscore_to_camel
+
+    id = fields.Integer(as_string=True, dump_only=True)
+    date_created = fields.DateTime(dump_only=True)
+
+    sender = fields.Str(dump_only=True)
+    bot = fields.Bool()
+    text = fields.Str()
+
+    prompt = Relationship(self_view='message_prompt',
+                          self_view_kwargs={'id': '<id>'},
+                          related_view='prompt_detail',
+                          related_view_kwargs={'message_id': '<id>'},
+                          schema='PromptSchema',
+                          type_='prompt')
+
+    chat = Relationship(self_view='message_chat',
+                        self_view_kwargs={'id': '<id>'},
+                        related_view='chat_detail',
+                        related_view_kwargs={'message_id': '<id>'},
+                        schema='ChatSchema',
+                        type_='chat')
