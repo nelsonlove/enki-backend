@@ -25,26 +25,53 @@ class User(db.Model):
         return f'<User #{self.id}>'
 
 
-class Asset(BaseModel):
-    __abstract__ = True
+class Message(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, default=db.func.now())
 
-    name = db.Column(db.Text, nullable=True)
-    description = db.Column(db.Text, nullable=True)
-    _messages = db.Column(db.Text, nullable=False)
+    prompt = db.relationship('Prompt', backref=db.backref('messages', lazy=True))
+    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt.id'), nullable=True)
 
-    @declared_attr
-    def owner_id(self):
-        return db.Column(db.Integer, db.ForeignKey('user.id'))
+    chat = db.relationship('Chat', backref=db.backref('messages', lazy=True))
+    chat_id = db.Column(db.Integer, db.ForeignKey('chat.id'), nullable=True)
+
+    bot = db.Column(db.Boolean)
+    text = db.Column(db.Text, nullable=False)
 
     @property
-    def messages(self):
-        if self._messages == '[]':
-            return []  # json.loads throws error on empty list
-        return json.loads(self._messages)
+    def sender(self):
+        if self.prompt_id:
+            prompt = self.prompt
+        else:
+            prompt = self.chat.prompt
+        if self.bot:
+            return prompt.bot
+        else:
+            return prompt.human
 
-    @messages.setter
-    def messages(self, message_json_str):
-        self._messages = message_json_str
+    def check_if_needs_reply(self):
+        if self.chat and not self.bot:
+            self.chat.get_reply()
+
+    def __repr__(self):
+        return f'<Message #{self.id} [{self.sender}: {self.text}]>'
+
+
+class Prompt(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, default=db.func.now())
+    date_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+    visible = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=True)
+
+    intro = db.Column(db.Text, nullable=False)
+    bot = db.Column(db.String(255), nullable=False)
+    human = db.Column(db.String(255), nullable=False)
+
+    temperature = db.Column(db.Integer, nullable=False, default=50)
+    variety = db.Column(db.Integer, nullable=False, default=50)
+    verbosity = db.Column(db.Integer, nullable=False, default=300)
 
     owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     owner = db.relationship('User', backref=db.backref('prompts', lazy=True))
