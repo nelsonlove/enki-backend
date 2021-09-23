@@ -1,22 +1,28 @@
-import json
-
 from sqlalchemy import update
 from sqlalchemy.orm import declared_attr
 
 from .database import db
 
 
-class BaseModel(db.Model):
-    __abstract__ = True
-
+class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     date_created = db.Column(db.DateTime, default=db.func.now())
     date_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
-    private = db.Column(db.Boolean, default=True)
+
+    auth_id = db.Column(db.String(120), unique=True, nullable=False)  # from auth0
+    nickname = db.Column(db.String(120), unique=True, nullable=True)
+    api_key = db.Column(db.String(80), nullable=True)
+
+    visible_chats = db.Column(db.Boolean, default=False)
+    visible_prompts = db.Column(db.Boolean, default=True)
+
+    def touch(self):
+        db.engine.execute(
+            update(User).where(User.id == self.id)
+        )
 
     def __repr__(self):
-        return f'<{self.__class__.__name__} #{self.id}>'
+        return f'<User #{self.id}>'
 
 
 class Asset(BaseModel):
@@ -40,22 +46,29 @@ class Asset(BaseModel):
     def messages(self, message_json_str):
         self._messages = message_json_str
 
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    owner = db.relationship('User', backref=db.backref('prompts', lazy=True))
 
-class Chat(Asset):
-    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt.id'), nullable=False)
+    def __repr__(self):
+        return f'<Prompt #{self.id}>'
+
+
+class Chat(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    date_created = db.Column(db.DateTime, default=db.func.now())
+    date_modified = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+    visible = db.Column(db.Boolean, default=False)
+    active = db.Column(db.Boolean, default=True)
+
+    owner_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     owner = db.relationship("User", backref=db.backref('chats', lazy=True))
+
+    prompt_id = db.Column(db.Integer, db.ForeignKey('prompt.id'), nullable=True)
     prompt = db.relationship("Prompt", backref=db.backref('chats', lazy=True))
 
-
-class Prompt(Asset):
-    # GPT args
-    intro_text = db.Column(db.Text, nullable=False)
-    bot_name = db.Column(db.String(255), nullable=False)
-    human_name = db.Column(db.String(255), nullable=False)
-    max_tokens = db.Column(db.Integer, nullable=False, default=300)
-    temperature = db.Column(db.Float(2), nullable=False, default=0.5)
-    frequency_penalty = db.Column(db.Float(2), nullable=False, default=0.0)
-    presence_penalty = db.Column(db.Float(2), nullable=False, default=0.0)
+    def __repr__(self):
+        return f'<Chat #{self.id}>'
 
     owner = db.relationship('User', backref=db.backref('prompts'))
 
