@@ -1,7 +1,7 @@
 from sqlalchemy import update
-from sqlalchemy.orm import declared_attr
 
-from .database import db
+from enki_api.database import db
+from enki_api.gpt import get_reply
 
 
 class User(db.Model):
@@ -97,23 +97,17 @@ class Chat(db.Model):
     def __repr__(self):
         return f'<Chat #{self.id}>'
 
-    owner = db.relationship('User', backref=db.backref('prompts'))
+    def get_reply(self):
+        prompt_messages = Message.query.filter_by(prompt_id=self.prompt_id)
+        chat_messages = Message.query.filter_by(chat_id=self.id)
+        messages = prompt_messages.union(chat_messages).all()
 
+        reply = get_reply(self.prompt, messages)
+        message = Message(
+            chat_id=self.id,
+            bot=True,
+            text=reply
+        )
 
-class User(BaseModel):
-    nickname = db.Column(db.String(120), unique=True, nullable=True)
-    auth_id = db.Column(db.String(120), unique=True, nullable=False)  # from auth0
-    api_key = db.Column(db.String(80), unique=True, nullable=False)
-
-    def touch(self):
-        stmt = update(User).where(User.id == self.id)
-        db.engine.execute(stmt)
-
-    @property
-    def assets_last_active(self):
-        last_chat = sorted(self.chats, key=lambda c: c.date_last_active, reverse=True)[0]
-        last_prompt = sorted(self.prompts, key=lambda p: p.date_last_active, reverse=True)[0]
-        return {
-            'prompt': last_prompt,
-            'chat': last_chat
-        }
+        db.session.add(message)
+        db.session.commit()
