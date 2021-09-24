@@ -25,6 +25,9 @@ class UserSchema(Schema):
     auth_id = fields.Str()  # from auth0
     nickname = fields.Str()
     api_key = fields.Str(load_only=True)
+    has_api_key = fields.Function(lambda obj: bool(obj.api_key), dump_only=True)
+    invite_code = fields.Str(load_only=True)
+    has_invite_code = fields.Function(lambda obj: bool(obj.invite_code), dump_only=True)
 
     visible = fields.Bool()
     visible_chats = fields.Bool()

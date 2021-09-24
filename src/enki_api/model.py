@@ -12,6 +12,7 @@ class User(db.Model):
     auth_id = db.Column(db.String(120), unique=True, nullable=False)  # from auth0
     nickname = db.Column(db.String(120), unique=True, nullable=True)
     api_key = db.Column(db.String(80), nullable=True)
+    invite_code = db.Column(db.String(80), default='', nullable=True)
 
     visible_chats = db.Column(db.Boolean, default=False)
     visible_prompts = db.Column(db.Boolean, default=True)
