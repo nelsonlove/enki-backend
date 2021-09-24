@@ -33,7 +33,7 @@ class UserSchema(Schema):
     prompts = Relationship(self_view='user_prompts',
                            self_view_kwargs={'id': '<id>'},
                            related_view='prompt_list',
-                           related_view_kwargs={'id': '<id>'},
+                           related_view_kwargs={'user_id': '<id>'},
                            many=True,
                            schema='PromptSchema',
                            type_='prompt')
@@ -41,7 +41,7 @@ class UserSchema(Schema):
     chats = Relationship(self_view='user_chats',
                          self_view_kwargs={'id': '<id>'},
                          related_view='chat_list',
-                         related_view_kwargs={'id': '<id>'},
+                         related_view_kwargs={'user_id': '<id>'},
                          many=True,
                          schema='ChatSchema',
                          type_='chat')
