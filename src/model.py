@@ -1,7 +1,7 @@
 from sqlalchemy import update
 
-from enki_api.database import db
-from enki_api.gpt import get_reply
+from database import db
+from gpt import get_reply
 
 
 class User(db.Model):

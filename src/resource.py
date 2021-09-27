@@ -2,9 +2,9 @@ from flask_rest_jsonapi import ResourceList, ResourceDetail, ResourceRelationshi
 from flask_rest_jsonapi.exceptions import ObjectNotFound
 from sqlalchemy.exc import NoResultFound
 
-from enki_api.database import db
-from enki_api.model import User, Prompt, Chat, Message
-from enki_api.schema import UserSchema, PromptSchema, ChatSchema, MessageSchema
+from database import db
+from model import User, Prompt, Chat, Message
+from schema import UserSchema, PromptSchema, ChatSchema, MessageSchema
 
 
 def query_from_related(data_model, session, view_kwargs, related):

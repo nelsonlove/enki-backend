@@ -2,10 +2,10 @@ from flask import Flask
 from flask_rest_jsonapi import Api
 from flask_cors import CORS
 
-from enki_api import database
-from enki_api import resource
+import database
+import resource
 
-app = Flask(__name__)
+application = app = Flask(__name__)
 
 app.config['SECRET_KEY'] = 'ultratopsecretkey'
 app.config['DEBUG'] = True
