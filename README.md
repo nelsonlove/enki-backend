@@ -1,2 +1,2 @@
 # enki-backend
-Backend for enki.chat
+ Flask/MySQL backend for enki.chat
